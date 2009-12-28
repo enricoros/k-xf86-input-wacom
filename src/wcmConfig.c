@@ -134,6 +134,7 @@ static int xf86WcmAllocate(LocalDevicePtr local, char* type_name, int flag)
 	common->wcmDevCls = &gWacomUSBDevice; /* device-specific functions */
 	common->wcmTPCButton = 
 		common->wcmTPCButtonDefault; /* set Tablet PC button on/off */
+	common->wcmTouchpadMode = 0;       /* default to disable when touchpad isn't supported */
 	common->wcmCapacity = -1;          /* Capacity is disabled */
 	common->wcmCapacityDefault = -1;    /* default to -1 when capacity isn't supported */
 					   /* 3 when capacity is supported */

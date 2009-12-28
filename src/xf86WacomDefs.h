@@ -431,6 +431,8 @@ struct _WacomCommonRec
 	int wcmGestureDefault;       /* default touch gesture to disable when not supported */
 	int wcmGestureMode;	       /* data is in Gesture Mode? */
 	WacomDeviceState wcmGestureState[MAX_FINGERS]; /* inital state when in gesture mode */
+	int wcmTouchpadMode;            /* state when in touchpad mode */
+	WacomDeviceState wcmTouchpadState; /* inital state when entering touchpad mode */
 	int wcmCapacity;	     /* disable/enable capacity */
 	int wcmCapacityDefault;      /* default to -1 when capacity isn't supported/disabled */
 				     /* 3 when capacity is supported */

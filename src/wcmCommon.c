@@ -1191,6 +1191,64 @@ void wcmEvent(WacomCommonPtr common, unsigned int channel,
 		}
 	}
 
+	if (ds.device_type == TOUCH_ID) {
+		WacomDeviceState* pds = &common->wcmTouchpadState;
+		WacomDevicePtr priv = common->wcmDevices;
+
+		if (ds.proximity)
+			switch (common->wcmTouchpadMode) {
+				case 0:
+					common->wcmTouchpadMode = 1;
+					common->wcmTouchpadState = ds;
+					common->wcmTouchpadState.sample = (int)GetTimeInMillis();
+					break;
+				case 1:
+					if (GetTimeInMillis() - pds->sample <= 200) {
+						int xd = ds.x - pds->x;
+						int yd = ds.y - pds->y;
+
+						if (xd*xd + yd*yd > 10*10)
+							common->wcmTouchpadMode = 2;
+					} else {
+						/* left button down */
+						xf86PostButtonEvent(priv->local->dev,
+						                    priv->flags & ABSOLUTE_FLAG,
+						                    1,1,0,priv->naxes, priv->oldX,
+						                    priv->oldY,0,0,0,0);
+						common->wcmTouchpadMode = 3;
+					}
+					break;
+			}
+		else {
+			switch (common->wcmTouchpadMode) {
+				case 1:
+					if (GetTimeInMillis() - pds->sample <= 200) {
+						/* left button down */
+						xf86PostButtonEvent(priv->local->dev,
+						                    priv->flags & ABSOLUTE_FLAG,
+						                    1,1,0,priv->naxes, priv->oldX,
+						                    priv->oldY,0,0,0,0);
+						/* left button up */
+						xf86PostButtonEvent(priv->local->dev,
+						                    priv->flags & ABSOLUTE_FLAG,
+						                    1,0,0,priv->naxes, priv->oldX,
+						                    priv->oldY,0,0,0,0);
+					}
+					break;
+				case 3:
+					/* left button up */
+					xf86PostButtonEvent(priv->local->dev,
+						                    priv->flags & ABSOLUTE_FLAG,
+						                    1,0,0,priv->naxes, priv->oldX,
+						                    priv->oldY,0,0,0,0);
+			}
+			common->wcmTouchpadMode = 0;
+		}
+		if (common->wcmTouchpadMode == 1 || common->wcmTouchpadMode == 2)
+			ds.buttons &= ~1;
+	}
+
+
 	/* JEJ - Do not move this code without discussing it with me.
 	 * The device state is invariant of any filtering performed below.
 	 * Changing the device state after this point can and will cause
